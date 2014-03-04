@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 
 class Stats:
   'Stats class for CSTV/GameTracker'
+  DEBUG = False
 
   def __init__(self, date, code, home_visitor):
     self.date = date
