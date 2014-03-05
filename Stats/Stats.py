@@ -2,7 +2,8 @@
 
 from urllib2 import urlopen
 from bs4 import BeautifulSoup
-
+import pprint
+import json
 
 class Stats:
   'Stats class for CSTV/GameTracker'
@@ -19,6 +20,11 @@ class Stats:
     self.hits = self.getHits()
     self.errors = self.getErrors()
     self.linescore = self.getLinescore()
+    self.pitching = self.getPitchingStats()
+    self.batting = self.getBattingStats()
+    self.order = self.getBattingOrder()
+    self.lineup = self.getStarters()
+    self.info = self.info()
 
   def debug(self):
     Stats.DEBUG = True
@@ -307,3 +313,9 @@ class Stats:
 
     return dict(id=self.id, name=self.name, code=self.code, rank=self.rank,
                 record=self.record)
+
+  def pretty(self, obj):
+    try:
+      print json.dumps(obj, indent = 4)
+    except:
+        sys.exc_info()[0]
