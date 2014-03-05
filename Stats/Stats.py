@@ -2,17 +2,19 @@
 
 from urllib2 import urlopen
 from bs4 import BeautifulSoup
-import pprint
 import json
+import sys
+import re
+
 
 class Stats:
   'Stats class for CSTV/GameTracker'
-  DEBUG = False
+  __DEBUG = False
 
   def __init__(self, date, code, home_visitor):
     self.date = date
     self.code = code
-    self.setHomeOrVisitor(home_visitor)
+    self.__setHomeOrVisitor(home_visitor)
     self.rank = self.getRank()
     self.record = self.getRecord()
     self.name = self.getName()
@@ -21,47 +23,52 @@ class Stats:
     self.errors = self.getErrors()
     self.linescore = self.getLinescore()
     self.pitching = self.getPitchingStats()
-    self.batting = self.getBattingStats()
+    self.hitting = self.getHittingStats()
     self.order = self.getBattingOrder()
     self.lineup = self.getStarters()
     self.info = self.info()
+    self.situational_hitting = self.getHSitSummary()
+    self.fielding = self.getFieldingStats()
 
   def debug(self):
-    Stats.DEBUG = True
+    Stats.__DEBUG is True
 
-  def setSoup(self):
-    event_ids = self.getEventIDs()
+  def __setSoup(self):
+    event_ids = self.__getEventIDs()
     if len(event_ids) == 1:
       event_id = event_ids[0]
       url = 'http://origin.livestats.www.cstv.com/livestats/data/m-basebl/' + event_id + '/player_stats.xml'
       html = urlopen(url).read()
-      print url
+      if Stats.__DEBUG is True:
+        print url
 
       soup = BeautifulSoup(html, 'lxml')
 
       return soup
 
-  def setHomeOrVisitor(self, home_visitor):
-    soup = self.setSoup()
+  def __setHomeOrVisitor(self, home_visitor):
+    soup = self.__setSoup()
     if home_visitor == 'visitor':
       self.team = soup.find('team', attrs={'vh': 'V'})
     elif home_visitor == 'home':
       self.team = soup.find('team', attrs={'vh': 'H'})
 
-  def getEventIDs(self):
+  def __getEventIDs(self):
     event_ids = []
     url = 'http://livestats.www.cstv.com/scoreboards/' + self.date + '-m-basebl-scoreb.xml'
-    print url
+
+    if Stats.__DEBUG is True:
+      print url
 
     html = urlopen(url).read()
     soup = BeautifulSoup(html, 'lxml')
     events = soup.findAll('event')
 
     for event in events:
-        if event['hcode'] == self.code:
-          event_ids.append(event['event_id'])
-        if event['vcode'] == self.code:
-          event_ids.append(event['event_id'])
+      if event['hcode'] == self.code:
+        event_ids.append(event['event_id'])
+      if event['vcode'] == self.code:
+        event_ids.append(event['event_id'])
 
     return event_ids
 
@@ -140,163 +147,57 @@ class Stats:
 
     return lob
 
-  def getBattingStats(self):
-    hitting = self.team.find('totals').find('hitting')
-
-    if hitting.has_attr('ab'):
-      ab = int(hitting['ab'])
-    else:
-      ab = 0
-    if hitting.has_attr('r'):
-      r = int(hitting['r'])
-    else:
-      r = 0
-    if hitting.has_attr('h'):
-      h = int(hitting['h'])
-    else:
-      h = 0
-    if hitting.has_attr('rbi'):
-      rbi = int(hitting['rbi'])
-    else:
-      rbi = 0
-    if hitting.has_attr('double'):
-      double = int(hitting['double'])
-    else:
-      double = 0
-    if hitting.has_attr('triple'):
-      triple = int(hitting['triple'])
-    else:
-      triple = 0
-    if hitting.has_attr('hr'):
-      hr = int(hitting['hr'])
-    else:
-      hr = 0
-    if hitting.has_attr('bb'):
-      bb = int(hitting['bb'])
-    else:
-      bb = 0
-    if hitting.has_attr('so'):
-      so = int(hitting['so'])
-    else:
-      so = 0
-    if hitting.has_attr('hbp'):
-      hbp = int(hitting['hbp'])
-    else:
-      hbp = 0
-    if hitting.has_attr('sb'):
-      sb = int(hitting['sb'])
-    else:
-      sb = 0
-    if hitting.has_attr('cs'):
-      cs = int(hitting['cs'])
-    else:
-      cs = 0
-    if hitting.has_attr('sh'):
-      sh = int(hitting['sh'])
-    else:
-      sh = 0
-    if hitting.has_attr('gdp'):
-      gdp = int(hitting['gdp'])
-    else:
-      gdp = 0
-    if hitting.has_attr('picked'):
-      picked = int(hitting['picked'])
-    else:
-      picked = 0
-    if hitting.has_attr('hitdp'):
-      hitdp = int(hitting['hitdp'])
-    else:
-      hitdp = 0
-    if hitting.has_attr('ground'):
-      ground = int(hitting['ground'])
-    else:
-      ground = 0
-    if hitting.has_attr('fly'):
-      fly = int(hitting['fly'])
-    else:
-      fly = 0
-
-    hitting_stats = dict(ab=ab, r=r, h=h, rbi=rbi, doubles=double, triples=triple, hr=hr,
-                         bb=bb, so=so, hbp=hbp, sb=sb, cs=cs, sh=sh, gidp=gdp, pickoff=picked,
-                         hitdp=hitdp, gout=ground, fout=fly)
-
-    return hitting_stats
+  def getHittingStats(self):
+    'Situational Hitting Summary'
+    return self.__getAttrs('hitting')
 
   def getPitchingStats(self):
-    pitching = self.team.find('totals').find('pitching')
+    'Fielding Stats'
+    return self.__getAttrs('pitching')
 
-    if pitching.has_attr('ip'):
-      ip = float(pitching['ip'])
-    else:
-      ip = 0.0
-    if pitching.has_attr('h'):
-      h = int(pitching['h'])
-    else:
-      h = 0
-    if pitching.has_attr('r'):
-      r = int(pitching['r'])
-    else:
-      r = 0
-    if pitching.has_attr('er'):
-      er = int(pitching['er'])
-    else:
-      er = 0
-    if pitching.has_attr('bb'):
-      bb = int(pitching['bb'])
-    else:
-      bb = 0
-    if pitching.has_attr('so'):
-      so = int(pitching['so'])
-    else:
-      so = 0
-    if pitching.has_attr('bf'):
-      bf = int(pitching['bf'])
-    else:
-      bf = 0
-    if pitching.has_attr('ab'):
-      ab = int(pitching['ab'])
-    else:
-      ab = 0
-    if pitching.has_attr('double'):
-      double = int(pitching['double'])
-    else:
-      double = 0
-    if pitching.has_attr('triple'):
-      triple = int(pitching['triple'])
-    else:
-      triple = 0
-    if pitching.has_attr('wp'):
-      wp = int(pitching['wp'])
-    else:
-      wp = 0
-    if pitching.has_attr('bk'):
-      bk = int(pitching['bk'])
-    else:
-      bk = 0
-    if pitching.has_attr('hbp'):
-      hbp = int(pitching['hbp'])
-    else:
-      hbp = 0
-    if pitching.has_attr('kl'):
-      kl = int(pitching['kl'])
-    else:
-      kl = 0
-    if pitching.has_attr(''):
-      fly = int(pitching['fly'])
-    else:
-      fly = 0
-    if pitching.has_attr(''):
-      ground = int(pitching['ground'])
-    else:
-      ground = 0
+  def getFieldingStats(self):
+    'Fielding Stats'
+    return self.__getAttrs('fielding')
 
-    pitching_stats = dict(ip=ip, h=h, r=r, er=er, bb=bb, so=so, bf=bf, ab=ab,
-                          doubles=double, triples=triple, wp=wp, bk=bk, hbp=hbp,
-                          kl=kl, fout=fly, gout=ground)
+  def getHSitSummary(self):
+    'Situational Hitting Summary'
+    return self.__getAttrs('hsitsummary')
 
-    return pitching_stats
+  def getPSitSummary(self):
+    'Situational Pitching Summary'
+    return self.__getAttrs('psitsummary')
 
-  def isNeutral(self, other):
+  def __maptotype(self, v):
+    if len(re.findall('[0-9]*\.[0-9]+', v)) > 0:
+      return float(v)
+    elif len(re.findall('[0-9]+', v)) > 0:
+      return int(v)
+    else:
+      return str(v)
+
+  def __getAttrs(self, stat):
+    hk = []
+    hv = []
+    vl = []
+    stats = self.team.find('totals').find(stat)
+
+    for k, v in stats.attrs.iteritems():
+      vx = v.split(',')
+      vxr = vx
+      if len(vx) > 1:
+        for i in range(0, vx.count(',')):
+          vxr = vx.remove(',')
+        vl = [self.__maptotype(x) for x in vxr]
+
+        hk.append(k)
+        hv.append(vl)
+      else:
+        hk.append(k)
+        hv.append(self.__maptotype(v))
+
+    return dict(zip(hk, hv))
+
+  def __isNeutral(self, other):
     if self.team['neutralgame'] == 'Y' and other.team['neutralgame'] == 'Y':
       neutralgame = True
     else:
@@ -316,6 +217,6 @@ class Stats:
 
   def pretty(self, obj):
     try:
-      print json.dumps(obj, indent = 4)
+      print json.dumps(obj, indent=4)
     except:
         sys.exc_info()[0]
