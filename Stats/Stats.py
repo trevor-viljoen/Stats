@@ -9,26 +9,27 @@ import re
 
 class Stats:
   'Stats class for CSTV/GameTracker'
-  __DEBUG = False
+  __DEBUG = True
 
   def __init__(self, date, code, home_visitor):
     self.date = date
     self.code = code
     self.__setHomeOrVisitor(home_visitor)
-    self.rank = self.getRank()
-    self.record = self.getRecord()
-    self.name = self.getName()
-    self.runs = self.getRuns()
-    self.hits = self.getHits()
-    self.errors = self.getErrors()
-    self.linescore = self.getLinescore()
-    self.pitching = self.getPitchingStats()
-    self.hitting = self.getHittingStats()
-    self.order = self.getBattingOrder()
-    self.lineup = self.getStarters()
-    self.info = self.info()
-    self.situational_hitting = self.getHSitSummary()
-    self.fielding = self.getFieldingStats()
+    if self.team is not None:
+      self.rank = self.getRank()
+      self.record = self.getRecord()
+      self.name = self.getName()
+      self.runs = self.getRuns()
+      self.hits = self.getHits()
+      self.errors = self.getErrors()
+      self.linescore = self.getLinescore()
+      self.pitching = self.getPitchingStats()
+      self.hitting = self.getHittingStats()
+      self.order = self.getBattingOrder()
+      self.lineup = self.getStarters()
+      self.info = self.info()
+      self.situational_hitting = self.getHSitSummary()
+      self.fielding = self.getFieldingStats()
 
   def debug(self):
     Stats.__DEBUG is True
@@ -41,17 +42,22 @@ class Stats:
       html = urlopen(url).read()
       if Stats.__DEBUG is True:
         print url
-
       soup = BeautifulSoup(html, 'lxml')
+    else:
+      ''' Handle DH '''
+      soup = None
 
       return soup
 
   def __setHomeOrVisitor(self, home_visitor):
     soup = self.__setSoup()
-    if home_visitor == 'visitor':
-      self.team = soup.find('team', attrs={'vh': 'V'})
-    elif home_visitor == 'home':
-      self.team = soup.find('team', attrs={'vh': 'H'})
+    if soup is not None:
+      if home_visitor == 'visitor':
+        self.team = soup.find('team', attrs={'vh': 'V'})
+      elif home_visitor == 'home':
+        self.team = soup.find('team', attrs={'vh': 'H'})
+    else:
+      self.team = None
 
   def __getEventIDs(self):
     event_ids = []
@@ -168,9 +174,9 @@ class Stats:
     return self.__getAttrs('psitsummary')
 
   def __maptotype(self, v):
-    if len(re.findall('[0-9]*\.[0-9]+', v)) > 0:
+    if len(re.findall('^[0-9]*\.[0-9]+$', v)) > 0:
       return float(v)
-    elif len(re.findall('[0-9]+', v)) > 0:
+    elif len(re.findall('^[0-9]+$', v)) > 0:
       return int(v)
     else:
       return str(v)
@@ -197,6 +203,35 @@ class Stats:
 
     return dict(zip(hk, hv))
 
+  def __getPlayerAttrs(self, player):
+    hk = []
+    hv = []
+    vl = []
+
+    for k, v in player.attrs.iteritems():
+      if type(v) is list:
+        if len(v) == 1:
+          v = v[0]
+      if k == 'shortname':
+        vx = v
+        hk.append(k)
+        hv.append(self.__maptotype(v))
+      else:
+        vx = v.split(',')
+        vxr = vx
+        if len(vx) > 1:
+          for i in range(0, vx.count(',')):
+            vxr = vx.remove(',')
+          vl = [self.__maptotype(x.strip()) for x in vxr]
+
+          hk.append(k)
+          hv.append(vl)
+        else:
+          hk.append(k)
+          hv.append(self.__maptotype(v))
+
+    return dict(zip(hk, hv))
+
   def __isNeutral(self, other):
     if self.team['neutralgame'] == 'Y' and other.team['neutralgame'] == 'Y':
       neutralgame = True
@@ -204,6 +239,22 @@ class Stats:
       neutralgame = False
 
     return neutralgame
+
+  def getPlayerStats(self, name):
+    player_name = self.team.find('player')['name']
+    #for player in players:
+
+      #player_stats.append(self.__getPlayerAttrs(player))
+    return player_name
+
+  def getRoster(self):
+    roster = []
+    players = self.team.findAll('player')
+
+    for player in players:
+      roster.append(self.__getPlayerAttrs(player))
+
+    return roster
 
   def info(self):
     self.id = self.team['id']
