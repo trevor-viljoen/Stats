@@ -9,12 +9,12 @@ import re
 
 class Stats:
   'Stats class for CSTV/GameTracker'
-  __DEBUG = True
+  __DEBUG = False
 
-  def __init__(self, date, code, home_visitor):
-    self.date = date
-    self.code = code
-    self.__setHomeOrVisitor(home_visitor)
+  def init_game(self, event_id):
+    self.soup = self.__setSoup(event_id)
+    self.__isHomeVisitor(self.home_visitor, event_id)
+    self.__setTeam(event_id)
     if self.team is not None:
       self.rank = self.getRank()
       self.record = self.getRecord()
@@ -27,35 +27,77 @@ class Stats:
       self.hitting = self.getHittingStats()
       self.order = self.getBattingOrder()
       self.lineup = self.getStarters()
-      self.info = self.info()
+      self.info = self.getInfo()
+      self.situational_hitting = self.getHSitSummary()
+      self.fielding = self.getFieldingStats()
+
+  def __init__(self, date, code, event_id = None):
+    self.num_games = 0
+    self.home_visitor = []
+    self.team = None
+    self.ishome = False
+    self.isvisitor = False
+    self.date = date
+    self.code = code
+    self.event_ids = self.__getEventIDs()
+    self.num_games = len(self.event_ids)
+    if event_id is None:
+      if self.num_games == 1:
+        self.soup = self.__setSoup(self.event_ids[0])
+        self.__setTeam(self.event_ids[0])
+    else:
+      self.soup = self.__setSoup(event_id)
+      self.__setTeam(event_id)
+    if self.team is not None:
+      self.rank = self.getRank()
+      self.record = self.getRecord()
+      self.name = self.getName()
+      self.runs = self.getRuns()
+      self.hits = self.getHits()
+      self.errors = self.getErrors()
+      self.linescore = self.getLinescore()
+      self.pitching = self.getPitchingStats()
+      self.hitting = self.getHittingStats()
+      self.order = self.getBattingOrder()
+      self.lineup = self.getStarters()
+      self.info = self.getInfo()
       self.situational_hitting = self.getHSitSummary()
       self.fielding = self.getFieldingStats()
 
   def debug(self):
     Stats.__DEBUG is True
 
-  def __setSoup(self):
-    event_ids = self.__getEventIDs()
-    if len(event_ids) == 1:
-      event_id = event_ids[0]
+  def __isHomeVisitor(self, hvlist, event_id):
+    for game in hvlist:
+      if game['event_id'] == event_id:
+          if game.has_key('home'):
+            self.ishome = True
+            self.isvisitor = False
+            self.opponent = game['ocode']
+          elif game.has_key('visitor'):
+            self.isvisitor = True
+            self.ishome = False
+            self.opponent = game['ocode']
+
+  def __setSoup(self, eid):
+    if eid is not None:
+      event_id = eid
       url = 'http://origin.livestats.www.cstv.com/livestats/data/m-basebl/' + event_id + '/player_stats.xml'
       html = urlopen(url).read()
       if Stats.__DEBUG is True:
         print url
       soup = BeautifulSoup(html, 'lxml')
     else:
-      ''' Handle DH '''
       soup = None
 
-      return soup
+    return soup
 
-  def __setHomeOrVisitor(self, home_visitor):
-    soup = self.__setSoup()
-    if soup is not None:
-      if home_visitor == 'visitor':
-        self.team = soup.find('team', attrs={'vh': 'V'})
-      elif home_visitor == 'home':
-        self.team = soup.find('team', attrs={'vh': 'H'})
+  def __setTeam(self, event_id):
+    if self.soup is not None:
+      if self.ishome:
+        self.team = self.soup.find('team', {'vh': 'H'})
+      elif self.isvisitor:
+        self.team = self.soup.find('team', {'vh': 'V'})
     else:
       self.team = None
 
@@ -72,8 +114,10 @@ class Stats:
 
     for event in events:
       if event['hcode'] == self.code:
+        self.home = self.home_visitor.append(dict(event_id=event['event_id'], home=True, ocode=event['vcode']))
         event_ids.append(event['event_id'])
       if event['vcode'] == self.code:
+        self.visitor = self.home_visitor.append(dict(event_id=event['event_id'], visitor=True, ocode=event['hcode']))
         event_ids.append(event['event_id'])
 
     return event_ids
@@ -240,6 +284,12 @@ class Stats:
 
     return neutralgame
 
+  def isHomeTeam(self):
+    return self.home
+
+  def isVisitingTeam(self):
+    return self.visiting
+
   def getPlayerStats(self, name):
     player_name = self.team.find('player')['name']
     #for player in players:
@@ -256,7 +306,7 @@ class Stats:
 
     return roster
 
-  def info(self):
+  def getInfo(self):
     self.id = self.team['id']
     self.name = self.team['name']
     self.code = self.team['code']
