@@ -41,7 +41,8 @@ class Stats:
     self.code = code
     self.event_ids = self.__getEventIDs()
     self.num_games = len(self.event_ids)
-    if event_id is None:
+    self.event_id = event_id
+    if self.event_id is None:
       if self.num_games == 1:
         self.soup = self.__setSoup(self.event_ids[0])
         self.__setTeam(self.event_ids[0])
