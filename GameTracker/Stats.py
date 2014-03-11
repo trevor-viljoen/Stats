@@ -45,6 +45,7 @@ class Stats:
     if self.event_id is None:
       if self.num_games == 1:
         self.soup = self.__setSoup(self.event_ids[0])
+        self.__isHomeVisitor(self.home_visitor, self.event_ids[0])
         self.__setTeam(self.event_ids[0])
     else:
       self.soup = self.__setSoup(event_id)
@@ -71,14 +72,14 @@ class Stats:
   def __isHomeVisitor(self, hvlist, event_id):
     for game in hvlist:
       if game['event_id'] == event_id:
-          if game.has_key('home'):
-            self.ishome = True
-            self.isvisitor = False
-            self.opponent = game['ocode']
-          elif game.has_key('visitor'):
-            self.isvisitor = True
-            self.ishome = False
-            self.opponent = game['ocode']
+        if game.has_key('home'):
+          self.ishome = True
+          self.isvisitor = False
+          self.opponent = game['ocode']
+        elif game.has_key('visitor'):
+          self.isvisitor = True
+          self.ishome = False
+          self.opponent = game['ocode']
 
   def __setSoup(self, eid):
     if eid is not None:
@@ -316,6 +317,33 @@ class Stats:
 
     return dict(id=self.id, name=self.name, code=self.code, rank=self.rank,
                 record=self.record)
+
+  def BoxScore(self, other):
+    innings = max(len(self.linescore), len(other.linescore))
+    if self.ishome is True:
+      home = self
+      visitor = other
+    elif self.isvisitor is True:
+      home = other
+      visitor = other
+
+    boxscore = '   '
+    for i in range(1, innings + 1):
+      boxscore = boxscore + ' ' + str(i)
+    boxscore = boxscore + ' ' + ' R  H  E\n'
+    boxscore = boxscore + visitor.code
+
+    for i in visitor.linescore:
+      boxscore = boxscore + ' ' + str(i)
+    boxscore = boxscore + '  ' + str(visitor.runs) + '  ' + str(visitor.hits) + '  ' + str(visitor.errors) + '\n'
+
+    boxscore = boxscore + home.code
+
+    for i in home.linescore:
+      boxscore = boxscore + ' ' + str(i)
+    boxscore = boxscore + '  ' + str(home.runs) + '  ' + str(home.hits) + '  ' + str(home.errors) + '\n'
+
+    return boxscore
 
   def pretty(self, obj):
     try:
