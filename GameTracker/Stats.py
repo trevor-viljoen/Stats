@@ -9,7 +9,7 @@ import re
 
 class Stats:
   'Stats class for CSTV/GameTracker'
-  __DEBUG = False
+  __DEBUG = True
 
   def init_game(self, event_id):
     self.soup = self.__setSoup(event_id)
@@ -31,7 +31,7 @@ class Stats:
       self.situational_hitting = self.getHSitSummary()
       self.fielding = self.getFieldingStats()
 
-  def __init__(self, date, code, event_id = None):
+  def __init__(self, date, code, event_id=None):
     self.num_games = 0
     self.home_visitor = []
     self.team = None
@@ -72,11 +72,11 @@ class Stats:
   def __isHomeVisitor(self, hvlist, event_id):
     for game in hvlist:
       if game['event_id'] == event_id:
-        if game.has_key('home'):
+        if 'home' in game:
           self.ishome = True
           self.isvisitor = False
           self.opponent = game['ocode']
-        elif game.has_key('visitor'):
+        elif 'visitor' in game:
           self.isvisitor = True
           self.ishome = False
           self.opponent = game['ocode']
@@ -163,7 +163,10 @@ class Stats:
     return name
 
   def getRank(self):
-    rank = int(self.team['rank'])
+    if self.team.has_attr('rank') is True:
+      rank = int(self.team['rank'])
+    else:
+      rank = 'NR'
 
     return rank
 
@@ -310,16 +313,14 @@ class Stats:
 
   def getInfo(self):
     self.id = self.team['id']
-    self.name = self.team['name']
-    self.code = self.team['code']
-    self.rank = self.team['rank']
-    self.record = self.team['record'].split('-')
 
     return dict(id=self.id, name=self.name, code=self.code, rank=self.rank,
                 record=self.record)
 
   def BoxScore(self, other):
     innings = max(len(self.linescore), len(other.linescore))
+    name_spacing = max(len(self.code), len(other.code))
+
     if self.ishome is True:
       home = self
       visitor = other
@@ -327,17 +328,17 @@ class Stats:
       home = other
       visitor = other
 
-    boxscore = '   '
+    boxscore = ' ' * name_spacing
     for i in range(1, innings + 1):
       boxscore = boxscore + ' ' + str(i)
     boxscore = boxscore + ' ' + ' R  H  E\n'
-    boxscore = boxscore + visitor.code
+    boxscore = boxscore + visitor.code + ' ' * (name_spacing - len(visitor.code))
 
     for i in visitor.linescore:
       boxscore = boxscore + ' ' + str(i)
     boxscore = boxscore + '  ' + str(visitor.runs) + '  ' + str(visitor.hits) + '  ' + str(visitor.errors) + '\n'
 
-    boxscore = boxscore + home.code
+    boxscore = boxscore + home.code + ' ' * (name_spacing - len(home.code))
 
     for i in home.linescore:
       boxscore = boxscore + ' ' + str(i)
