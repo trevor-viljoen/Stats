@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
-import sys
 
 
 class PlayByPlay:
@@ -9,13 +8,12 @@ class PlayByPlay:
   def __init__(self, event_id):
     self.event_id = event_id
 
-
   def __inning_output(self, line, pad, output):
     inn = 1
     for inning in line:
       inn = inn + 1
       if len(pad) > 0:
-        for ip in inn_pad:
+        for ip in pad:
           if ip['inn'] == inn:
             if ip['pad'] == 2:
               output = output + '  ' + str(inning)
@@ -25,7 +23,6 @@ class PlayByPlay:
         output = output + ' ' + str(inning)
 
     return output
-
 
   def __spacing(self, vt, ht, output):
     if vt > 9 or ht > 9:
@@ -39,7 +36,6 @@ class PlayByPlay:
       output = output + ' ' + str(vt)
 
     return output
-
 
   def __rhelob_spacing(self, vtr, vth, vte, vtlob, htr, hth, hte, htlob, output):
     if vtr > 9 or htr > 9:
@@ -60,7 +56,6 @@ class PlayByPlay:
       output = output + ' LOB'
 
     return output
-
 
   def playbyplay(self):
     url = 'http://origin.livestats.www.cstv.com/livestats/data/m-basebl/' + self.event_id + '/play_by_play.xml'
