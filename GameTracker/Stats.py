@@ -9,7 +9,7 @@ import re
 
 class Stats:
   'Stats class for CSTV/GameTracker'
-  __DEBUG = True
+  __DEBUG = False
 
   def init_game(self, event_id):
     self.soup = self.__setSoup(event_id)
