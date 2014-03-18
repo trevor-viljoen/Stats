@@ -15,3 +15,7 @@ Example usage:
   erors = home.errors
   
   linescore = home.linescore
+
+## Demo:
+
+![gif](http://i.imgur.com/rG0N197.gif)
