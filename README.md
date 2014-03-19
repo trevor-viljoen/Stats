@@ -9,7 +9,7 @@ Example usage:
   okst_info = okst.info
   okst_runs = okst.runs
   okst_hits = okst.hits
-  okst_erors = okst.errors
+  okst_erorrs = okst.errors
   okst_linescore = okst.linescore
   okst_situational_hitting = okst.situationl_hitting
   okst_opponent = okst.opponent
