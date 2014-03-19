@@ -203,11 +203,11 @@ class Stats:
     return lob
 
   def getHittingStats(self):
-    'Situational Hitting Summary'
+    'Hitting Summary'
     return self.__getAttrs('hitting')
 
   def getPitchingStats(self):
-    'Fielding Stats'
+    'Pitching Stats'
     return self.__getAttrs('pitching')
 
   def getFieldingStats(self):
