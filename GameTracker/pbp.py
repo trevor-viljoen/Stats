@@ -24,16 +24,21 @@ class PlayByPlay:
 
     return output
 
-  def __spacing(self, vt, ht, output):
+  def __spacing(self, vt, ht, output, lob=False):
+    if lob is True:
+      padding = '  '
+    else:
+      padding = ' '
+
     if vt > 9 or ht > 9:
       if vt > 9 and ht <= 9:
-        output = output + ' ' + str(vt)
+        output = output + padding + str(vt)
       elif ht > 9 and vt <= 9:
-        output = output + '  ' + str(vt)
+        output = output + padding + ' ' + str(vt)
       else:
-        output = output + ' ' + str(vt)
+        output = output + padding + str(vt)
     else:
-      output = output + ' ' + str(vt)
+      output = output + padding + str(vt)
 
     return output
 
@@ -51,7 +56,7 @@ class PlayByPlay:
     else:
       output = output + ' E'
     if vtlob > 9 or htlob > 9:
-      output = output + '  LOB'
+      output = output + ' LOB'
     else:
       output = output + ' LOB'
 
@@ -116,6 +121,15 @@ class PlayByPlay:
       hline.append('X')
 
     output = output + '\n'
+
+    # special case for 10 or more runs in the 1st inning
+    spad = 0
+    if hline[0] > 9 or vline[0] > 9:
+      spad = 1
+      home = home + ' '
+      visitor = visitor + ' '
+    #
+
     if len(home) > len(visitor):
       padding = len(home)
       visitor = visitor + ' '
@@ -137,13 +151,13 @@ class PlayByPlay:
 
     inn = 1
     for inning in hline:
-      inn = inn + 1
       if inning == 'X':
         inning = 0
       if inning > 9:
         inn_pad.append({'inn': inn, 'pad': 2})
+      inn = inn + 1
 
-    inn_pad = list(set(inn_pad))
+    inn_pad = {ip['inn']:ip for ip in inn_pad}.values()
 
     inn = 1
     for inning in range(1, total_innings + 1):
@@ -155,6 +169,7 @@ class PlayByPlay:
               output = output + '  ' + str(inning)
             else:
               output = output + ' ' + str(inning)
+        output = output + ' ' + str(inning)
       else:
         output = output + ' ' + str(inning)
 
@@ -166,7 +181,7 @@ class PlayByPlay:
     output = self.__spacing(vtr, htr, output)
     output = self.__spacing(vth, hth, output)
     output = self.__spacing(vte, hte, output)
-    output = self.__spacing(vtlob, htlob, output)
+    output = self.__spacing(vtlob, htlob, output, True)
 
     output = output + '\n' + home
     output = self.__inning_output(hline, inn_pad, output)
@@ -174,6 +189,6 @@ class PlayByPlay:
     output = self.__spacing(htr, vtr, output)
     output = self.__spacing(hth, vth, output)
     output = self.__spacing(hte, vte, output)
-    output = self.__spacing(htlob, vtlob, output)
+    output = self.__spacing(htlob, vtlob, output, True)
 
     return output
