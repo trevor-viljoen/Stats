@@ -85,6 +85,7 @@ class Stats:
     if eid is not None:
       event_id = eid
       url = 'http://origin.livestats.www.cstv.com/livestats/data/m-basebl/' + event_id + '/player_stats.xml'
+      self.url = url
       html = urlopen(url).read()
       if Stats.__DEBUG is True:
         print url
@@ -252,12 +253,12 @@ class Stats:
 
     return dict(zip(hk, hv))
 
-  def __getPlayerAttrs(self, player):
+  def __getPlayerAttrs(self, playerstats):
     hk = []
     hv = []
     vl = []
 
-    for k, v in player.attrs.iteritems():
+    for k, v in playerstats.attrs.iteritems():
       if type(v) is list:
         if len(v) == 1:
           v = v[0]
@@ -296,11 +297,34 @@ class Stats:
     return self.visiting
 
   def getPlayerStats(self, name):
-    player_name = self.team.find('player')['name']
-    #for player in players:
+    player_stats = []
+    names = []
+    stats = {}
+    thisplayer = None
+    players = self.team.findAll('player')
 
-      #player_stats.append(self.__getPlayerAttrs(player))
-    return player_name
+    for player in players:
+      if player['shortname'].find(name) == 0:
+        thisplayer = player
+        break
+      else:
+        thisplayer = None
+
+    if thisplayer is not None:
+      names.append(thisplayer.name)
+      player_stats.append(self.__getPlayerAttrs(thisplayer))
+      children = thisplayer.findChildren()
+
+      for child in children:
+        names.append(child.name)
+        player_stats.append(self.__getPlayerAttrs(child))
+
+      for k, v in zip(names, player_stats):
+        stats[k] = v
+
+      return stats
+    else:
+      return None
 
   def getRoster(self):
     roster = []
