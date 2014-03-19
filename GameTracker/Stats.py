@@ -317,16 +317,16 @@ class Stats:
     return dict(id=self.id, name=self.name, code=self.code, rank=self.rank,
                 record=self.record)
 
-  def BoxScore(self, other):
-    innings = max(len(self.linescore), len(other.linescore))
-    name_spacing = max(len(self.code), len(other.code))
+  def BoxScore(self, opponent):
+    innings = max(len(self.linescore), len(opponent.linescore))
+    name_spacing = max(len(self.code), len(opponent.code))
 
     if self.ishome is True:
       home = self
-      visitor = other
+      visitor = opponent
     elif self.isvisitor is True:
-      home = other
-      visitor = other
+      home = opponent
+      visitor = self
 
     boxscore = ' ' * name_spacing
     for i in range(1, innings + 1):
