@@ -21,4 +21,4 @@ Example usage:
 ```
 ## Demo:
 
-![gif](http://i.imgur.com/rG0N197.gif)
+![gif](http://i.imgur.com/bjvmGhq.gif)
