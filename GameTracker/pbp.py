@@ -11,16 +11,22 @@ class PlayByPlay:
   def __inning_output(self, line, pad, output):
     inn = 1
     for inning in line:
-      inn = inn + 1
       if len(pad) > 0:
         for ip in pad:
           if ip['inn'] == inn:
-            if ip['pad'] == 2:
-              output = output + '  ' + str(inning)
-          else:
-            output = output + ' ' + str(inning)
+            if ip['inn'] > 1:
+              if inning > 9:
+                output = output + ' ' + str(inning)
+                break
+              else:
+                output = output + ' ' * ip['pad'] + str(inning)
+                break
+            else:
+              output = output + ' ' * ip['pad'] + str(inning)
+              break
       else:
         output = output + ' ' + str(inning)
+      inn = inn + 1
 
     return output
 
@@ -155,21 +161,21 @@ class PlayByPlay:
         inning = 0
       if inning > 9:
         inn_pad.append({'inn': inn, 'pad': 2})
+      else:
+        inn_pad.append({'inn': inn, 'pad': 1})
       inn = inn + 1
 
     inn_pad = {ip['inn']:ip for ip in inn_pad}.values()
+    print inn_pad
 
-    inn = 1
     for inning in range(1, total_innings + 1):
-      inn = inn + 1
       if len(inn_pad) > 0:
         for ip in inn_pad:
-          if ip['inn'] == inn:
+          if ip['inn'] == inning:
             if ip['pad'] == 2:
               output = output + '  ' + str(inning)
             else:
               output = output + ' ' + str(inning)
-        output = output + ' ' + str(inning)
       else:
         output = output + ' ' + str(inning)
 
