@@ -97,7 +97,7 @@ class PlayByPlay:
           output = output + '\nTop ' + inn
         else:
           home = bat['id']
-          output =  output + '\nBot ' + inn
+          output = output + '\nBot ' + inn
 
         for play in bat.findAll('play'):
           output = output + '\n\t' + play.find('narrative')['text']
@@ -129,9 +129,7 @@ class PlayByPlay:
     output = output + '\n'
 
     # special case for 10 or more runs in the 1st inning
-    spad = 0
     if hline[0] > 9 or vline[0] > 9:
-      spad = 1
       home = home + ' '
       visitor = visitor + ' '
     #
@@ -165,8 +163,7 @@ class PlayByPlay:
         inn_pad.append({'inn': inn, 'pad': 1})
       inn = inn + 1
 
-    inn_pad = {ip['inn']:ip for ip in inn_pad}.values()
-    print inn_pad
+    inn_pad = {ip['inn']: ip for ip in inn_pad}.values()
 
     for inning in range(1, total_innings + 1):
       if len(inn_pad) > 0:
