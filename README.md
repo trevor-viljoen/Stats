@@ -1,6 +1,7 @@
 Example usage:
-
+```python
   import Stats
+  import pbp
   
   okst = Stats.Stats('20140302', 'okst')
   okst_pitching = okst.pitching
@@ -14,7 +15,10 @@ Example usage:
   okst_opponent = okst.opponent
   
   okst_event_ids = okst.event_ids  # list of games for that day
-
+  
+  okst_pbp = pbp.PlayByPlay(okst_event_ids[0])
+  print okst_pbp.playbyplay()
+```
 ## Demo:
 
 ![gif](http://i.imgur.com/rG0N197.gif)
