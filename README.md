@@ -1,20 +1,19 @@
 Example usage:
 
-  home = Stats.Stats('20140302', 'okst', 'home')
+  import Stats
   
-  home.getPitchingStats()
+  okst = Stats.Stats('20140302', 'okst')
+  okst_pitching = okst.pitching
+  okst_hitting = okst.hitting
+  okst_info = okst.info
+  okst_runs = okst.runs
+  okst_hits = okst.hits
+  okst_erors = okst.errors
+  okst_linescore = okst.linescore
+  okst_situational_hitting = okst.situationl_hitting
+  okst_opponent = okst.opponent
   
-  home.getHittingStats()
-  
-  home.info()
-
-  runs = home.runs
-  
-  hits = home.hits
-  
-  erors = home.errors
-  
-  linescore = home.linescore
+  okst_event_ids = okst.event_ids  # list of games for that day
 
 ## Demo:
 
