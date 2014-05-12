@@ -48,7 +48,9 @@ class Stats:
         self.__isHomeVisitor(self.home_visitor, self.event_id)
         self.__setTeam(self.event_id)
     else:
+      self.event_id = event_id
       self.soup = self.__setSoup(event_id)
+      self.__isHomeVisitor(self.home_visitor, self.event_id)
       self.__setTeam(event_id)
     if self.team is not None:
       self.rank = self.getRank()
@@ -172,8 +174,12 @@ class Stats:
     return rank
 
   def getRecord(self):
-    w = int(self.team['record'].split('-')[0])
-    l = int(self.team['record'].split('-')[1])
+    if self.team.has_attr('record'):
+      w = int(self.team['record'].split('-')[0])
+      l = int(self.team['record'].split('-')[1])
+    else:
+      w = 0
+      l = 0
     record = [w, l]
 
     return record
