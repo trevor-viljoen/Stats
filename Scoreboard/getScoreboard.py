@@ -28,14 +28,18 @@ def get_scoreboard(scoreboard_date):
     s = BeautifulSoup(xml2, 'lxml')
     try:
       venue = s.find('venue')
-      umpires = venue.umpires.attrs
-      venue_dict = venue.attrs
-      drop_attrs = ['homeid', 'homename', 'visid', 'visname']
-      venue_info = {k: v for (k, v) in venue_dict.iteritems() if k not in drop_attrs}
-      venue_info['attend'] = int(venue_info['attend'])
-      venue_info['schedinn'] = int(venue_info['schedinn'])
-      slash =  [i for i in range(len(venue.attrs['date'])) if venue.attrs['date'].startswith('/', i)]
-      venue_info['date'] = datetime.datetime(int(venue_info['date'][slash[1] + 1:len(venue_info['date'])]), int(venue_info['date'][0:slash[0]]), int(venue_info['date'][slash[0] + 1:slash[1]]))
+      if venue:
+        umpires = venue.umpires.attrs
+        venue_dict = venue.attrs
+        drop_attrs = ['homeid', 'homename', 'visid', 'visname']
+        venue_info = {k: v for (k, v) in venue_dict.iteritems() if k not in drop_attrs}
+        venue_info['attend'] = int(venue_info['attend'])
+        venue_info['schedinn'] = int(venue_info['schedinn'])
+        slash =  [i for i in range(len(venue.attrs['date'])) if venue.attrs['date'].startswith('/', i)]
+        venue_info['date'] = datetime.datetime(int(venue_info['date'][slash[1] + 1:len(venue_info['date'])]), int(venue_info['date'][0:slash[0]]), int(venue_info['date'][slash[0] + 1:slash[1]]))
+      else:
+        umpires = None
+        venue_info = None
     except:
       e = sys.exc_info()[0]
       print 'event_id: ' + event_id + '\n' + summary_url +'\n\nError: ' + str(e)
