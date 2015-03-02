@@ -136,10 +136,10 @@ class PlayByPlay:
 
     if len(home) > len(visitor):
       padding = len(home)
-      visitor = visitor + ' '
+      visitor = visitor + ' ' * (padding - len(visitor))
     elif len(visitor) > len(home):
       padding = len(visitor)
-      home = home + ' '
+      home = home + ' ' * (padding - len(home))
     else:
       padding = len(home)
 
