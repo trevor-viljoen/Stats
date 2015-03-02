@@ -7,7 +7,7 @@ end_reg_season="$2"
 
 this_date=$start_reg_season
 
-until [ "$this_date" == "$end_reg_season" ]
+until [ "$this_date" -gt "$end_reg_season" ]
 do
   python getScoreboard.py $this_date
   if [ "$(uname)" == "Darwin" ]
