@@ -87,11 +87,11 @@ def get_scoreboard(scoreboard_date):
       db.scoreboard.insert({'_id': event_id, 'vname': vname, 'vcode': vcode, 'vscore': vscore, 'hname': hname, 'hcode': hcode, 'hscore': hscore, 'gdate': gdate, 'gtime': gtime,
         'gtlink': gtlink, 'vconf': vconf, 'vdiv': vdiv, 'hconf': hconf, 'hdiv': hdiv, 'neutral_site': neutral_site, 'umpires': umpires, 'venue': venue_info})
     else:
-      game = db.scoreboard.find_one({'_id': event_id, 'vscore': vscore, 'hscore': hscore, 'neutral_site': neutral_site, 'umpires': umpires})
+      game = db.scoreboard.find_one({'_id': event_id, 'hcode': hcode, 'vcode': vcode, 'vscore': vscore, 'hscore': hscore, 'neutral_site': neutral_site, 'umpires': umpires})
 
       if game is None:
         print 'Updating database for ' + event_id # + ': with a new score. '  + vname + ', ' + str(vscore) + ', ' + hname + ' ' + str(hscore) + '.'
-        db.scoreboard.update({ '_id': event_id}, {'$set': {'vscore': vscore, 'hscore': hscore, 'neutral_site': neutral_site, 'umpires': umpires, 'venue': venue_info}}, upsert=True)
+        db.scoreboard.update({ '_id': event_id}, {'$set': {'vname': vname, 'vcode': vcode, 'vconf': vconf, 'hname': hname, 'hcode': hcode , 'hconf': hconf, 'gdate': gdate, 'gtime': gtime, 'gtlink': gtlink, 'vdiv': vdiv, 'hdiv': hdiv, 'vscore': vscore, 'hscore': hscore, 'neutral_site': neutral_site, 'umpires': umpires, 'venue': venue_info}}, upsert=True)
 
 
 get_scoreboard(sys.argv[1])
