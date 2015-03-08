@@ -16,7 +16,7 @@ class PlayByPlay:
           if ip['inn'] == inn:
             if ip['inn'] > 1:
               if inning > 9:
-                output = output + ' ' + str(inning)
+                output = output + '  ' + str(inning)
                 break
               else:
                 output = output + ' ' * ip['pad'] + str(inning)
