@@ -2,8 +2,14 @@
 
 #start_reg_season="20140214"
 #end_reg_season="20140525"
-start_reg_season="$1"
-end_reg_season="$2"
+if [ $? -lt 2 ]
+then
+  start_reg_season="$(date +%Y%m%d)"
+  end_reg_season="$start_reg_season"
+else
+  start_reg_season="$1"
+  end_reg_season="$2"
+fi
 
 this_date=$start_reg_season
 
